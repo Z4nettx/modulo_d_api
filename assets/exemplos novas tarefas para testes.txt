@@ -1,0 +1,39 @@
+[
+  {
+    "titulo": "Desenvolver novo módulo de relatórios",
+    "descricao": "Criar um módulo para gerar relatórios personalizados de vendas e estoque.",
+    "prazo": "2024-12-31",
+    "equipe": "Desenvolvimento",
+    "prioridade": "Alta",
+    "status": "Em Andamento",
+    "projeto_id": 4
+  },
+  {
+    "titulo": "Redesenhar o layout do site",
+    "descricao": "Atualizar o visual do site para uma experiência de usuário mais moderna e intuitiva.",
+    "prazo": "2024-11-15",
+    "equipe": "Design",
+    "prioridade": "Média",
+    "status": "a fazer",
+    "projeto_id": 2
+  },
+  {
+    "titulo": "Corrigir bug no módulo de login",
+    "descricao": "O sistema está apresentando um erro ao validar a senha do usuário. É necessário identificar e corrigir o problema.",
+    "prazo": "2024-11-30",
+    "equipe": "Desenvolvimento",
+    "prioridade": "Alta",
+    "status": "Aberto",
+    "projeto_id": 3
+  },
+  {
+    "titulo": "Implementar nova funcionalidade de busca",
+    "descricao": "Desenvolva uma nova funcionalidade de busca que permita aos usuários encontrar registros de forma mais rápida e eficiente, utilizando filtros e ordenação.",
+    "prazo": "2025-01-15",
+    "equipe": "Desenvolvimento",
+    "prioridade": "Média",
+    "status": "Em Andamento",
+    "projeto_id": 5
+  }
+]
+
