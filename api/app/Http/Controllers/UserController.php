@@ -17,11 +17,11 @@ class UserController extends Controller
     public function signup(Request $request)
     {   
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'nome' => 'required|string|max:255',
             'email' => 'required|string|max:255',
             'equipe' => 'required|string|max:255',
             'username' => 'required|string|max:255',
-            'password' => 'required|string|max:255'
+            'senha' => 'required|string|max:255'
         ]);
         if ($validator->fails()) {
             if ($request->expectsJson()) {
@@ -35,17 +35,17 @@ class UserController extends Controller
         foreach ($users as $user) {
             if ($user['email'] === $request->email) {
                 if ($request->expectsJson()) {
-                    return response()->json(['errors' => ['email' => 'Usuário já cadastrado']], 422);
+                    return response()->json(['message' => ['email' => 'Usuário já cadastrado']], 422);
                 }
                 return back()->withErrors(['email' => 'Usuário já cadastrado']);
             }
         }
         $users[] = [
-            'name' => $request->name,
+            'nome' => $request->nome,
             'email' => $request->email,
             'username' => $request->username,
             'equipe' => $request->equipe,
-            'password' => bcrypt($request->password)
+            'senha' => bcrypt($request->senha)
         ];
         JsonDB::write('Incluir_usuarios', $users);
         return redirect()->route('login.index');
@@ -59,7 +59,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255',
-            'password' => 'required|max:255'
+            'senha' => 'required|max:255'
         ]);
         if ($validator->fails()) {
             if ($request->expectsJson()) {
@@ -69,20 +69,33 @@ class UserController extends Controller
         }
         $users = JsonDB::read('Incluir_usuarios');
         $foundUser = null;
-        foreach ($users as $user) {
+        $foundIndex = null;
+        foreach ($users as $index => $user) {
             if ($user['username'] === $request->username) {
                 $foundUser = $user;
+                $foundIndex = $index;
                 break;  
             }
         }
-        if (!$foundUser || !Hash::check($request->password, $foundUser['password'])) {
+        if (!$foundUser) {
             return response()->json(['message' => 'Login Inválido, tente novamente'], 401);
+        }
+        if (password_get_info($foundUser['senha'])['algo'] === null) {
+            if($foundUser['senha'] !== $request->senha) {
+                return response()->json(['message' => 'aLogin inválido, tente novamente'], 401);
+            }
+            $users[$foundIndex]['senha'] = Hash::make($request->senha);
+            JsonDB::write('Incluir_usuarios', $users);
+        } else {
+            if (!Hash::check($request->senha, $foundUser['senha'])) {
+                return response()->json(['message' => 'eLogin inválido, tente novamente'], 401);
+            }
         }
         $jwt = bin2hex(random_bytes(16));
         session([
-            'JWT' => $jwt,
+            'jwt' => $jwt,
             'user' => [
-                'name' => $foundUser['name'],
+                'nome' => $foundUser['nome'],
                 'email' => $foundUser['email'],
                 'username' => $foundUser['username'],
                 'equipe' => $foundUser['equipe'],

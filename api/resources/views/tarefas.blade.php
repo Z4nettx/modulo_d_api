@@ -7,6 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <h1>Lista de tarefas</h1>
+    <a href="{{route('tarefa.create')}}">+ Criar uma tarefa</a>
 </body>
 </html>

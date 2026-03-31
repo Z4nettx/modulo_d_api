@@ -14,7 +14,7 @@
     @endif
     <form action="{{route('signup')}}" method="post">
         @csrf
-        <input type="text" name="name" placeholder="name" maxlength="255" required>
+        <input type="text" name="nome" placeholder="name" maxlength="255" required>
         <input type="email" name="email" placeholder="email" maxlength="255" required>
         <input type="text" name="equipe" placeholder="equipe" maxlength="255" required>
         <input type="text" name="username" placeholder="username" maxlength="255" required>

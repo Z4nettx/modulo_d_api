@@ -15,7 +15,7 @@
     <form action="{{route('login')}}" method="post">
         @csrf
         <input type="text" name="username" placeholder="username" maxlength="255" required>
-        <input type="password" name="password" placeholder="senha" maxlength="255" required>
+        <input type="password" name="senha" placeholder="senha" maxlength="255" required>
         <button type="submit">Enviar</button>
     </form>
 </body>
