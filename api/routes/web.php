@@ -3,6 +3,7 @@
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+
 /* Route::get('/', function () {
     return view('welcome');
 }); */
@@ -19,7 +20,10 @@ Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
 Route::get('/add_tarefa', [TaskController::class, 'create'])->name('tarefa.create');
 Route::post('/add_tarefa', [TaskController::class, 'store'])->name('tarefa.store');
+
 Route::get('/altera_tarefa/{id}', [TaskController::class, 'edit'])->name('tarefa.edit');
 Route::put('/altera_tarefa/{id}', [TaskController::class, 'update'])->name('tarefa.update');
+
 Route::delete('/delete_tarefa/{id}', [TaskController::class, 'destroy']);
+
 Route::get('lista_tarefas', [TaskController::class, 'index'])->name('listatarefa');

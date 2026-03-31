@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JsonDB;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -10,7 +11,8 @@ class TaskController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
+    {   
+        JsonDB::read('');
         return view('tarefas');
     }
 
@@ -19,7 +21,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        return view()
+        return view('create_tarefa');
     }
 
     /**
