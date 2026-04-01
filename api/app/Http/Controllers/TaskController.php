@@ -14,23 +14,23 @@ class TaskController extends Controller
     public function index()
     {   
         $users = JsonDB::read('Incluir_usuarios');
-        return view('tarefas');
+        return view('tarefas', compact('users'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        $jwt = session('jwt');
-        if (!$jwt) {
-            return dd(session()->all());
-        }
-        $user = session('user');
-        if ($user['equipe'] != 'Gerente') {
+        $jwt = $request->bearerToken();
+        $user = json_decode(base64_decode($jwt), true);
+        // dd($user);
+        dd($request->bearerToken());
+        /* if ($user['equipe'] !== 'Gerente de Projeto') {
             return response()->json(['message' => 'Você não tem privilégio para incluir tarefas']);
-        }
-        return view('create_tarefa', compact('user', 'jwt'));
+        } */
+        $users = JsonDB::read('Incluir-usuarios');
+        return view('create_tarefa', compact('users'));
     }
 
     /**
@@ -38,10 +38,12 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        $jwt = $request->bearerToken();
+        $user = json_decode(base64_decode($jwt), true);
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:255',
             'descricao' => 'required|string|max:255',
-            'prazo' => 'required|string|max:255',
+            'prazo' => 'required|date_format:Y-m-d',
             'equipe' => 'required|string|max:255',
             'prioridade' => 'required|string|max:255',
             'status' => 'required|string|max:255',
@@ -51,16 +53,16 @@ class TaskController extends Controller
         if ($validator->fails()) {
             $failedRules = $validator->failed();
 
-            foreach ($failedRules as $field => $rules) {
+            foreach ($failedRules as $rules) {
                 if (isset($rules['Required'])) {
-                    return response()->json(['message' => 'Verifique e tente novamente, campos faltando', 422]);
+                    return response()->json(['message' => 'Verifique e tente novamente, campos faltando'], 422);
                 }
             }
-            return response()->json(['message' => 'Verifique e tente novamente, dados incorretos.']);
+            return response()->json(['message' => "Verifique e tente novamente, dados incorretos."], 422);
         }
         $tarefa = $request->all();
         if (JsonDB::write('Incluir-Tarefas', $tarefa)) {
-            return response()->json(['message' => 'Nova tarefa registrada com sucesso!', 201]);
+            return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
         }
     }
 

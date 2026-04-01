@@ -9,14 +9,15 @@ class JsonDB {
         if (!file_exists($path)) return [];
         return json_decode(file_get_contents($path), true) ?? [];
     }
-    public static function write(string $file, array $data): void
+    public static function write(string $file, array $data): bool
     {
 
         $path = storage_path("app/{$file}.json");
 
-        file_put_contents(
+        $result = file_put_contents(
             $path,
             json_encode($data, JSON_PRETTY_PRINT)
         );
+        return $result !== false;
     } 
 }

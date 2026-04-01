@@ -15,17 +15,26 @@ class UserController extends Controller
         return view('register');
     }
     public function signup(Request $request)
-    {   
+    {
         $validator = Validator::make($request->all(), [
             'nome' => 'required|string|max:255',
-            'email' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
             'equipe' => 'required|string|max:255',
             'username' => 'required|string|max:255',
             'senha' => 'required|string|max:255'
         ]);
         if ($validator->fails()) {
+            $failedRules = $validator->failed();
+
             if ($request->expectsJson()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+                foreach ($failedRules as $field => $rules) {
+                    if (isset($rules['Required'])) {
+                        return response()->json(['message' => 'Verifique novamente, campos faltando'], 422);
+                    }
+                }
+                if (isset($failedRules['email']['Email'])) {
+                    return response()->json(['message' => 'Verifique o email, tente novamente'], 422);
+                }
             }
             return back()->withErrors($validator->errors());
         }
@@ -35,7 +44,7 @@ class UserController extends Controller
         foreach ($users as $user) {
             if ($user['email'] === $request->email) {
                 if ($request->expectsJson()) {
-                    return response()->json(['message' => ['email' => 'Usuário já cadastrado']], 422);
+                    return response()->json(['message' => 'Usuário já cadastrado!'], 422);
                 }
                 return back()->withErrors(['email' => 'Usuário já cadastrado']);
             }
@@ -47,7 +56,9 @@ class UserController extends Controller
             'equipe' => $request->equipe,
             'senha' => bcrypt($request->senha)
         ];
-        JsonDB::write('Incluir_usuarios', $users);
+        if (JsonDB::write('Incluir_usuarios', $users) && $request->expectsJson()) {
+            return response()->json(['message' => 'Cadastro efetuado com sucesso'], 201);
+        }
         return redirect()->route('login.index');
     }
 
@@ -68,20 +79,21 @@ class UserController extends Controller
             return back()->withErrors($validator->errors());
         }
         $users = JsonDB::read('Incluir_usuarios');
+        $users = JsonDB::read('Incluir_usuarios');
         $foundUser = null;
         $foundIndex = null;
         foreach ($users as $index => $user) {
             if ($user['username'] === $request->username) {
                 $foundUser = $user;
                 $foundIndex = $index;
-                break;  
+                break;
             }
         }
         if (!$foundUser) {
             return response()->json(['message' => 'Login Inválido, tente novamente'], 401);
         }
         if (password_get_info($foundUser['senha'])['algo'] === null) {
-            if($foundUser['senha'] !== $request->senha) {
+            if ($foundUser['senha'] !== $request->senha) {
                 return response()->json(['message' => 'aLogin inválido, tente novamente'], 401);
             }
             $users[$foundIndex]['senha'] = Hash::make($request->senha);
@@ -91,16 +103,16 @@ class UserController extends Controller
                 return response()->json(['message' => 'eLogin inválido, tente novamente'], 401);
             }
         }
-        $jwt = bin2hex(random_bytes(16));
-        session([
-            'jwt' => $jwt,
-            'user' => [
-                'nome' => $foundUser['nome'],
-                'email' => $foundUser['email'],
-                'username' => $foundUser['username'],
-                'equipe' => $foundUser['equipe'],
-            ]
-        ]);
+        $cript = base64_encode(json_encode([
+            'nome' => $foundUser['nome'],
+            'email' => $foundUser['email'],
+            'username' => $foundUser['username'],
+            'equipe' => $foundUser['equipe'],
+        ]));
+        $jwt = $cript;
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Token: $jwt"], 200);
+        }
         return redirect()->route('listatarefa');
     }
     public function logout(Request $request)
