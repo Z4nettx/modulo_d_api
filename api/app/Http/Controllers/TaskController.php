@@ -13,7 +13,7 @@ class TaskController extends Controller
      */
     public function index()
     {   
-        $users = JsonDB::read('Incluir_usuarios');
+        $users = JsonDB::read('usuarios');
         return view('tarefas', compact('users'));
     }
 
@@ -23,13 +23,17 @@ class TaskController extends Controller
     public function create(Request $request)
     {
         $jwt = $request->bearerToken();
-        $user = json_decode(base64_decode($jwt), true);
-        // dd($user);
-        dd($request->bearerToken());
-        /* if ($user['equipe'] !== 'Gerente de Projeto') {
-            return response()->json(['message' => 'Você não tem privilégio para incluir tarefas']);
-        } */
-        $users = JsonDB::read('Incluir-usuarios');
+        $tokens = JsonDB::read('token');
+        foreach ($tokens as $token) {
+            if ($token['jwt'] === $jwt) {
+                $user = json_decode(base64_decode($token['jwt']), true);
+                break;
+            }    
+        }
+        if ($user['equipe'] !== 'Gerente de Projeto') {
+            return response()->json(['message' => 'Você não tem privilégio para incluir tarefas'], 422);
+        }
+        $users = JsonDB::read('usuarios');
         return view('create_tarefa', compact('users'));
     }
 
@@ -39,7 +43,12 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $jwt = $request->bearerToken();
-        $user = json_decode(base64_decode($jwt), true);
+        $tokens = JsonDB::read('token');
+        foreach ($tokens as $token) {
+            if ($token['jwt'] === $jwt) {
+                $user = json_decode(base64_decode($token['jwt']), true);
+            }
+        }
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:255',
             'descricao' => 'required|string|max:255',
@@ -61,7 +70,7 @@ class TaskController extends Controller
             return response()->json(['message' => "Verifique e tente novamente, dados incorretos."], 422);
         }
         $tarefa = $request->all();
-        if (JsonDB::write('Incluir-Tarefas', $tarefa)) {
+        if (JsonDB::write('tarefas', $tarefa)) {
             return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
         }
     }

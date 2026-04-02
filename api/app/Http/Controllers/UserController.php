@@ -39,7 +39,7 @@ class UserController extends Controller
             return back()->withErrors($validator->errors());
         }
 
-        $users = JsonDB::read('Incluir_usuarios');
+        $users = JsonDB::read('usuarios');
 
         foreach ($users as $user) {
             if ($user['email'] === $request->email) {
@@ -56,7 +56,7 @@ class UserController extends Controller
             'equipe' => $request->equipe,
             'senha' => bcrypt($request->senha)
         ];
-        if (JsonDB::write('Incluir_usuarios', $users) && $request->expectsJson()) {
+        if (JsonDB::write('usuarios', $users) && $request->expectsJson()) {
             return response()->json(['message' => 'Cadastro efetuado com sucesso'], 201);
         }
         return redirect()->route('login.index');
@@ -78,8 +78,8 @@ class UserController extends Controller
             }
             return back()->withErrors($validator->errors());
         }
-        $users = JsonDB::read('Incluir_usuarios');
-        $users = JsonDB::read('Incluir_usuarios');
+        $users = JsonDB::read('usuarios');
+        $users = JsonDB::read('usuarios');
         $foundUser = null;
         $foundIndex = null;
         foreach ($users as $index => $user) {
@@ -97,7 +97,7 @@ class UserController extends Controller
                 return response()->json(['message' => 'aLogin inválido, tente novamente'], 401);
             }
             $users[$foundIndex]['senha'] = Hash::make($request->senha);
-            JsonDB::write('Incluir_usuarios', $users);
+            JsonDB::write('usuarios', $users);
         } else {
             if (!Hash::check($request->senha, $foundUser['senha'])) {
                 return response()->json(['message' => 'eLogin inválido, tente novamente'], 401);
@@ -109,9 +109,16 @@ class UserController extends Controller
             'username' => $foundUser['username'],
             'equipe' => $foundUser['equipe'],
         ]));
-        $jwt = $cript;
+        $token[] = [
+            'jwt' => $cript,
+        ];
+        JsonDB::write('token', $token);
+
+        $tokens = JsonDB::read('token');
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Token: $jwt"], 200);
+            foreach ($tokens as $token) {                                                                                                                                                                                                                                                           
+                return response()->json(['message' => "Token: " . $token['jwt']], 200);
+            }
         }
         return redirect()->route('listatarefa');
     }

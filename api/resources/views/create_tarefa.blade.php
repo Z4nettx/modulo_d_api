@@ -25,7 +25,7 @@
         <select name="responsavel" id="responsavel">
             <option value="" selected disabled>Selecione um responsável pelo projeto</option>
             @foreach ($users as $index => $user)
-                <option value="{{$index}}">{{$user->name}}</option>
+                <option value="{{$index}}">{{$user['nome']}}</option>
             @endforeach
         </select>
     </form>

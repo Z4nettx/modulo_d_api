@@ -7,11 +7,6 @@
     <title>Document</title>
 </head>
 <body>
-    @if ($errors->any())
-        @foreach ($errors->all() as $error)
-            {{$error}}
-        @endforeach   
-    @endif
     <form action="{{route('signup')}}" method="post">
         @csrf
         <input type="text" name="nome" placeholder="name" maxlength="255" required><br>
