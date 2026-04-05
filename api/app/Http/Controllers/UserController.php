@@ -36,7 +36,6 @@ class UserController extends Controller
                     return response()->json(['message' => 'Verifique o email, tente novamente'], 422);
                 }
             }
-            return back()->withErrors($validator->errors());
         }
 
         $users = JsonDB::read('usuarios');
@@ -46,7 +45,6 @@ class UserController extends Controller
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Usuário já cadastrado!'], 422);
                 }
-                return back()->withErrors(['email' => 'Usuário já cadastrado']);
             }
         }
         $users[] = [
@@ -59,12 +57,6 @@ class UserController extends Controller
         if (JsonDB::write('usuarios', $users) && $request->expectsJson()) {
             return response()->json(['message' => 'Cadastro efetuado com sucesso'], 201);
         }
-        return redirect()->route('login.index');
-    }
-
-    public function index()
-    {
-        return view('login');
     }
     public function login(Request $request)
     {
@@ -74,9 +66,16 @@ class UserController extends Controller
         ]);
         if ($validator->fails()) {
             if ($request->expectsJson()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+                $failedRules = $validator->failed();
+                foreach ($failedRules as $field => $rules) {
+                    if (isset($rules['Required'])) {
+                        return response()->json(['message' => 'Verifique novamente, campos faltando'], 422);
+                    }
+                }
+                if (isset($failedRules['email']['Email'])) {
+                    return response()->json(['message' => 'Verifique o email, tente novamente'], 422);
+                }
             }
-            return back()->withErrors($validator->errors());
         }
         $users = JsonDB::read('usuarios');
         $users = JsonDB::read('usuarios');
@@ -109,23 +108,30 @@ class UserController extends Controller
             'username' => $foundUser['username'],
             'equipe' => $foundUser['equipe'],
         ]));
-        $token[] = [
-            'jwt' => $cript,
-        ];
+        $token = ['jwt' => $cript];
         JsonDB::write('token', $token);
 
         $tokens = JsonDB::read('token');
         if ($request->expectsJson()) {
-            foreach ($tokens as $token) {                                                                                                                                                                                                                                                           
+            foreach ($tokens as $token) {
                 return response()->json(['message' => "Token: " . $token['jwt']], 200);
             }
         }
-        return redirect()->route('listatarefa');
     }
+
     public function logout(Request $request)
     {
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('register.form');
+        $jwt = $request->bearerToken();
+        $tokens = Jsondb::read('token');
+        $key = $request->query('id');
+        foreach ($tokens as $token) {
+            if (!isset($jwt)) {
+                return response()->json(['message' => 'Atenção, token não informado'], 422);
+            } else if ($token['jwt'] !== $jwt) {
+                return response()->json(['message' => 'Atenção, token inválido'], 422);
+            } else {
+                
+            }
+        }
     }
 }

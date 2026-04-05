@@ -6,13 +6,13 @@ use App\Helpers\JsonDB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class TaskController extends Controller
+class SubtaskController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {   
+    {
         $token = $request->bearerToken();
         if (!$token) {
             return response()->json(['Message' => 'Atenção, token não informado'], 422);
@@ -22,7 +22,8 @@ class TaskController extends Controller
             return response()->json(['Message' => 'Atenção, token inválido'], 401);
         }
         $tarefas = JsonDB::read('tarefas');
-        return response()->json($tarefas, 200);
+        $subtarefas = $tarefas['subtarefas'];
+        return response()->json($subtarefas, 200);
     }
 
     /**
@@ -37,8 +38,8 @@ class TaskController extends Controller
             if ($user['equipe'] !== 'Gerente de Projeto') {
                 return response()->json(['message' => 'Você não tem privilégio para incluir tarefas'], 422);
             }
-        }    
-        
+        }
+
         $users = JsonDB::read('usuarios');
         return view('create_tarefa', compact('users'));
     }
@@ -80,9 +81,8 @@ class TaskController extends Controller
         }
         $tarefas = JsonDB::read('tarefas');
         $tarefa = [
-            'id' => count($tarefas)+1,
-            ...$request->all(),
-            'subtarefa'
+            'id' => count($tarefas) + 1,
+            ...$request->all()
         ];
         if (JsonDB::write('tarefas', $tarefa)) {
             return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
@@ -92,7 +92,7 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id, Request $request )
+    public function show($id, Request $request)
     {
         $token = $request->bearerToken();
         if (!$token) {
@@ -103,15 +103,15 @@ class TaskController extends Controller
             return response()->json(['Message' => 'Atenção, token inválido'], 401);
         }
         if (!$id) {
-           return response()->json(['message' => 'ID da tarefa não informado']); 
+            return response()->json(['message' => 'ID da tarefa não informado']);
         }
         $tarefas = JsonDB::read('tarefas');
 
         foreach ($tarefas as $tarefa) {
             // return response()->json($tarefa);
             if ($tarefa['id'] == $id) {
-                return response()->json($tarefa, 200); 
-            }     
+                return response()->json($tarefa, 200);
+            }
         }
         return response()->json(['message' => 'ID da tarefa inválido'], 422);
     }

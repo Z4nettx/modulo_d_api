@@ -1,0 +1,16 @@
+[
+    {
+        "nome": "bruna valerio",
+        "email": "bruna.valerio@gmail.com",
+        "username": "bruvalgon",
+        "equipe": "Desenvolvimento",
+        "senha": "$2y$12$DfG6Y3LzEUW7G9LFxkVm2O7kgH4XJV3Hv6TrJS9d8HMTrNvU5bCya"
+    },
+    {
+        "nome": "Eduardo",
+        "email": "eduardo@gmail.com",
+        "username": "Zanetti",
+        "equipe": "Gerente de Projeto",
+        "senha": "$2y$12$Ls0UDvehTiYeImwRtQ7gdeb3kTCd8YhtgDUIUAiq6pZyKrpTZDdpO"
+    }
+]

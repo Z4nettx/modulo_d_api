@@ -37,3 +37,5 @@ Route::delete('/delete_tarefa/{id}', [TaskController::class, 'destroy']);
 
 Route::get('lista_tarefas', [TaskController::class, 'index'])->name('listatarefa');
 
+Route::get('tarefa/{id}', [TaskController::class, 'show']);
+
