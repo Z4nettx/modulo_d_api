@@ -29,20 +29,15 @@ class SubtaskController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
-    {
-        
-
-        
-    }
+    public function create(Request $request) {}
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store($id, Request $request)
+    public function store(Request $request)
     {
         $jwt = $request->bearerToken();
-        
+
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:255',
             'descricao' => 'required|string|max:255',
@@ -52,7 +47,9 @@ class SubtaskController extends Controller
             'status' => 'required|string|max:255',
             'projeto' => 'required|string|max:255',
             'responsavel' => 'required|integer',
+            'tarefa' => 'required|integer'
         ]);
+        $id = $request->tarefa;
         if ($validator->fails()) {
             $failedRules = $validator->failed();
 
@@ -66,24 +63,32 @@ class SubtaskController extends Controller
         $tarefas = JsonDB::read('tarefas');
         foreach ($tarefas as $tarefa) {
             if ($tarefa['id'] == $id) {
-                $subtarefa = [
-                    'id' => count($tarefa['subtarefas']) + 1,
-                    ...$request->all()
+                $novaSubtarefa = [
+                    'id' => rand(0000, 10),
+                    // $request->except('tarefa')
+                    'titulo' => $request->titulo,
+                    'descricao' => $request->descricao,
+                    'prazo' => $request->prazo,
+                    'equipe' => $request->equipe,
+                    'prioridade' => $request->prioridade,
+                    'status' => $request->status,
+                    'projeto' => $request->projeto,
+                    'responsavel' => $request->responsavel,
+
                 ];
-                if (JsonDB::update('tarefas', 'id', $id, $)) { // voce parou aqui
-                    return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
+                $tarefa['subtarefas'][] = $novaSubtarefa;
+                if (JsonDB::update('tarefas', 'id', $id, $tarefa)) { // voce parou aqui
+                    return response()->json(['message' => 'Nova subtarefa registrada com sucesso!'], 201);
                 }
                 break;
             }
         }
-        
-        
     }
 
     /**
-     * Display the specified resource.
+     * Update the specified resource in storage.
      */
-    public function show($id, Request $request)
+    public function update(Request $request)
     {
         $token = $request->bearerToken();
         if (!$token) {
@@ -93,40 +98,54 @@ class SubtaskController extends Controller
         if ($token !== $jwt[0]['jwt']) {
             return response()->json(['Message' => 'Atenção, token inválido'], 401);
         }
-        if (!$id) {
-            return response()->json(['message' => 'ID da tarefa não informado']);
+        
+        if (!empty($request->except(['descricao', 'prazo', 'status', 'prioridade', 'responsavel', 'tarefa', 'subtarefa']))) {
+            return response()->json(['message' => 'Somente descrição, prazo, status, prioridade e responsável podem ser editados!'], 422);
         }
-        $tarefas = JsonDB::read('tarefas');
+        $tarefaId = $request['tarefa']; // id da tarefa envido pelo form
+        $stId = $request['subtarefa'];
+        
+        $tarefas = JsonDB::read('tarefas'); // o array tarefa completo
+        $camposPermitidos = [
+            'descricao' => $request['descricao'],
+            'prazo' => $request['prazo'],
+            'status' => $request['status'],
+            'prioridade' => $request['prioridade'],
+            'responsavel' => $request['responsavel']
+        ];
 
         foreach ($tarefas as $tarefa) {
-            // return response()->json($tarefa);
-            if ($tarefa['id'] == $id) {
-                return response()->json($tarefa, 200);
+            if ($tarefa['id'] == $tarefaId) {
+                $subtarefas = $tarefa['subtarefas'];
+                $encontrouSub = false;   
+                foreach ($subtarefas as &$st) {
+                    if ($st['id'] == $stId) {
+                        $st = array_merge($st, $camposPermitidos);
+                        $encontrouSub = true;
+                        break;
+                    }
+                }
+                if ($encontrouSub) {
+                    $novosDados = [
+                        "subtarefas" => $subtarefas
+                    ];
+                    if (JsonDB::update('tarefas', 'id', $tarefaId, $novosDados)) {
+                        return response()->json(['message' => 'Subtarefa atualizada com sucesso'], 200);
+                    }
+                }
             }
         }
-        return response()->json(['message' => 'ID da tarefa inválido'], 422);
-    }
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
+    public function destroy(Request $request, $id)
+    {   
+        $tarefas = JsonDB::read('tarefas');
+        foreach ($tarefas as $tarefa) {
+            if ($tarefa)
+        }
+        JsonDB::delete('tarefas', $)
     }
 }

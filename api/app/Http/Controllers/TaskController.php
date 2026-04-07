@@ -41,8 +41,19 @@ class TaskController extends Controller
         }
 
         $users = JsonDB::read('usuarios');
-        return view('create_tarefa', compact('users'));
-    }
+        foreach ($users as $index => $user) {
+            $user;// [] de usuario (nome, email, equipe)
+            $index; // indice desse elemento dentro do array
+
+            // 1
+            /* {
+                'nome' => 'eduardo',
+                'idade' => 16,
+                'profissao' => 'desempregado'
+                } */
+            // 1
+        }
+        }
 
     /**
      * Store a newly created resource in storage.
@@ -83,6 +94,7 @@ class TaskController extends Controller
         $tarefa = [
             'id' => count($tarefas) + 1,
             ...$request->all(),
+            'subtarefas' => [(object) []]
         ];
         if (JsonDB::store('tarefas', $tarefa)) {
             return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
@@ -165,7 +177,7 @@ class TaskController extends Controller
         }
         $tarefas = JsonDB::read('tarefas');
         foreach ($tarefas as $tarefa) {
-            // return response()->json($tarefa);
+            // return response()->json($tarefa);    
             if ($tarefa["id"] == $id) {
                 if (isset($tarefa['subtarefas'])) {
                     return response()->json(['message' => 'Essa tarefa possui subtarefas, você não pode excluí-la'], 401);

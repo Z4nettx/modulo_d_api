@@ -39,5 +39,6 @@ Route::get('lista_tarefas', [TaskController::class, 'index'])->name('listatarefa
 
 Route::get('tarefa/{id}', [TaskController::class, 'show']);
 
-Route::get('/add_subtarefa/{id}', [SubtaskController::class, 'store']); 
+Route::post('/add_subtarefa', [SubtaskController::class, 'store']); 
+Route::put('/altera_subtarefa/{id}', [SubtaskController::class, 'update']); 
 
