@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\JsonDB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\JsonDecoder;
 
 class TaskController extends Controller
 {
@@ -12,7 +13,7 @@ class TaskController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {   
+    {
         $token = $request->bearerToken();
         if (!$token) {
             return response()->json(['Message' => 'Atenção, token não informado'], 422);
@@ -37,8 +38,8 @@ class TaskController extends Controller
             if ($user['equipe'] !== 'Gerente de Projeto') {
                 return response()->json(['message' => 'Você não tem privilégio para incluir tarefas'], 422);
             }
-        }    
-        
+        }
+
         $users = JsonDB::read('usuarios');
         return view('create_tarefa', compact('users'));
     }
@@ -80,11 +81,10 @@ class TaskController extends Controller
         }
         $tarefas = JsonDB::read('tarefas');
         $tarefa = [
-            'id' => count($tarefas)+1,
+            'id' => count($tarefas) + 1,
             ...$request->all(),
-            'subtarefa'
         ];
-        if (JsonDB::write('tarefas', $tarefa)) {
+        if (JsonDB::store('tarefas', $tarefa)) {
             return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
         }
     }
@@ -92,7 +92,7 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id, Request $request )
+    public function show($id, Request $request)
     {
         $token = $request->bearerToken();
         if (!$token) {
@@ -103,15 +103,15 @@ class TaskController extends Controller
             return response()->json(['Message' => 'Atenção, token inválido'], 401);
         }
         if (!$id) {
-           return response()->json(['message' => 'ID da tarefa não informado']); 
+            return response()->json(['message' => 'ID da tarefa não informado']);
         }
         $tarefas = JsonDB::read('tarefas');
 
         foreach ($tarefas as $tarefa) {
             // return response()->json($tarefa);
             if ($tarefa['id'] == $id) {
-                return response()->json($tarefa, 200); 
-            }     
+                return response()->json($tarefa, 200);
+            }
         }
         return response()->json(['message' => 'ID da tarefa inválido'], 422);
     }
@@ -126,16 +126,54 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $token = $request->bearerToken();
+        if (!$token) {
+            return response()->json(['Message' => 'Atenção, token não informado'], 422);
+        }
+        $jwt = JsonDB::read('token');
+        if ($token !== $jwt[0]['jwt']) {
+            return response()->json(['Message' => 'Atenção, token inválido'], 401);
+        }
+        if (!empty($request->except(['descricao', 'prazo', 'status', 'prioridade', 'responsavel']))) {
+            return response()->json(['message' => 'Somente descrição, prazo, status, prioridade e responsável podem ser editados!'], 422);
+        }
+        $tarefaAtualizada = $request->only(['descricao', 'prazo', 'status', 'prioridade', 'responsavel']);
+
+        if (JsonDB::update('tarefas', 'id', $id, $tarefaAtualizada)) {
+            return response()->json(['message' => 'Tarefa atualizada com sucesso'], 200);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id, Request $request)
     {
-        //
+        $token = $request->bearerToken();
+        if (!$token) {
+            return response()->json(['Message' => 'Atenção, token não informado'], 422);
+        }
+        $jwt = JsonDB::read('token');
+        if ($token !== $jwt[0]['jwt']) {
+            return response()->json(['Message' => 'Atenção, token inválido'], 401);
+        }
+        $user = json_decode(base64_decode($token));
+        if ($user->equipe !== "Gerente de Projeto") {
+            return response()->json(['message' => 'Você não tem permissão para excluir uma tarefa'], 401);
+        }
+        $tarefas = JsonDB::read('tarefas');
+        foreach ($tarefas as $tarefa) {
+            // return response()->json($tarefa);
+            if ($tarefa["id"] == $id) {
+                if (isset($tarefa['subtarefas'])) {
+                    return response()->json(['message' => 'Essa tarefa possui subtarefas, você não pode excluí-la'], 401);
+                }
+            }
+        }
+        if (JsonDB::delete('tarefas', 'id', $id)) {
+            return response()->json(['message' => 'Tarefa excluida com sucesso'], 200);
+        }
     }
 }

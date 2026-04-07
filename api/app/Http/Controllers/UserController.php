@@ -54,7 +54,7 @@ class UserController extends Controller
             'equipe' => $request->equipe,
             'senha' => bcrypt($request->senha)
         ];
-        if (JsonDB::write('usuarios', $users) && $request->expectsJson()) {
+        if (JsonDB::store('usuarios', $users) && $request->expectsJson()) {
             return response()->json(['message' => 'Cadastro efetuado com sucesso'], 201);
         }
     }
@@ -96,7 +96,7 @@ class UserController extends Controller
                 return response()->json(['message' => 'aLogin inválido, tente novamente'], 401);
             }
             $users[$foundIndex]['senha'] = Hash::make($request->senha);
-            JsonDB::write('usuarios', $users);
+            JsonDB::store('usuarios', $users);
         } else {
             if (!Hash::check($request->senha, $foundUser['senha'])) {
                 return response()->json(['message' => 'eLogin inválido, tente novamente'], 401);
@@ -109,7 +109,7 @@ class UserController extends Controller
             'equipe' => $foundUser['equipe'],
         ]));
         $token = ['jwt' => $cript];
-        JsonDB::write('token', $token);
+        JsonDB::store('token', $token);
 
         $tokens = JsonDB::read('token');
         if ($request->expectsJson()) {

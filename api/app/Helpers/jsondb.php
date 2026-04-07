@@ -12,14 +12,33 @@ class JsonDB {
     public static function write(string $file, array $data): bool
     {
         $path = storage_path("app/{$file}.json");
-        $existingData = self::read($file);
-        $existingData[] = $data;
         $result = file_put_contents(
             $path,
-            json_encode($existingData, JSON_PRETTY_PRINT)
+            json_encode($data, JSON_PRETTY_PRINT)
         );
         return $result !== false;
     } 
+    public static function store(string $file, array $novaTarefa): bool
+    {
+        $dadosAtuais = self::read($file);
+        $dadosAtuais[] = $novaTarefa;
+
+        return self::write($file, $dadosAtuais);
+    }
+    public static function update(string $file, string $campo, $valor, array $novosDados): bool
+    {
+        $data = self::read($file);
+        $foiAlterado = false;
+
+        foreach ($data as &$item) {
+            if (isset($item[$campo]) && $item[$campo] == $valor) {
+                $item = array_merge($item, $novosDados);
+                $foiAlterado = true;
+                break;
+            }
+        }
+        return $foiAlterado ? self::write($file, $data) : false;
+    }
     public static function delete(string $file, string $key, $value): bool
     {
         $data = self::read($file);

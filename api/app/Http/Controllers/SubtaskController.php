@@ -31,34 +31,18 @@ class SubtaskController extends Controller
      */
     public function create(Request $request)
     {
-        $jwt = $request->bearerToken();
-        $token = JsonDB::read('token');
-        if ($token['jwt'] === $jwt) {
-            $user = json_decode(base64_decode($token['jwt']), true);
-            if ($user['equipe'] !== 'Gerente de Projeto') {
-                return response()->json(['message' => 'Você não tem privilégio para incluir tarefas'], 422);
-            }
-        }
+        
 
-        $users = JsonDB::read('usuarios');
-        return view('create_tarefa', compact('users'));
+        
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store($id, Request $request)
     {
         $jwt = $request->bearerToken();
-        $tokens = JsonDB::read('token');
-        foreach ($tokens as $token) {
-            if ($token['jwt'] === $jwt) {
-                $user = json_decode(base64_decode($token['jwt']), true);
-                if ($user['equipe'] !== 'Gerente de Projeto') {
-                    return response()->json(['message' => 'Você não tem privilégio para incluir tarefas'], 422);
-                }
-            }
-        }
+        
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:255',
             'descricao' => 'required|string|max:255',
@@ -80,13 +64,20 @@ class SubtaskController extends Controller
             return response()->json(['message' => "Verifique e tente novamente, dados incorretos."], 422);
         }
         $tarefas = JsonDB::read('tarefas');
-        $tarefa = [
-            'id' => count($tarefas) + 1,
-            ...$request->all()
-        ];
-        if (JsonDB::write('tarefas', $tarefa)) {
-            return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
+        foreach ($tarefas as $tarefa) {
+            if ($tarefa['id'] == $id) {
+                $subtarefa = [
+                    'id' => count($tarefa['subtarefas']) + 1,
+                    ...$request->all()
+                ];
+                if (JsonDB::update('tarefas', 'id', $id, $)) { // voce parou aqui
+                    return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
+                }
+                break;
+            }
         }
+        
+        
     }
 
     /**

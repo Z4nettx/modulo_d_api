@@ -7,7 +7,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum'); */
 
-
+use App\Http\Controllers\SubtaskController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -38,4 +38,6 @@ Route::delete('/delete_tarefa/{id}', [TaskController::class, 'destroy']);
 Route::get('lista_tarefas', [TaskController::class, 'index'])->name('listatarefa');
 
 Route::get('tarefa/{id}', [TaskController::class, 'show']);
+
+Route::get('/add_subtarefa/{id}', [SubtaskController::class, 'store']); 
 

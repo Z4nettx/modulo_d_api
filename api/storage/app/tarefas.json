@@ -1,25 +1,24 @@
 [
     {
-        "id": 1,
-        "titulo": "Titulo da tarefa",
-        "descricao": "Descricao da tarefa",
-        "prazo": "2026-10-20",
-        "equipe": "Desenvolvimento",
-        "prioridade": "Alta",
-        "status": "Em desenvolvimento",
-        "projeto": "Projeto teste",
-        "responsavel": "1"
-    },
-    {
         "id": 2,
         "titulo": "Titulo da tarefa",
-        "descricao": "Descricao da tarefa",
+        "descricao": "Descricao da tarefa atualizada",
         "prazo": "2026-10-20",
         "equipe": "Desenvolvimento",
         "prioridade": "Alta",
         "status": "Em desenvolvimento",
-        "projeto": "Projeto teste",
-        "responsavel": "1"
+        "projeto": "Projeto teste1",
+        "responsavel": "1",
+        "subtarefas": {
+            "titulo": "Titulo  de Subtarefas",
+            "descricao": "Descricao de Subtarefas",
+            "prazo": "2026-10-20",
+            "equipe": "Desenvolvimento",
+            "prioridade": "Alta",
+            "status": "Em desenvolvimento",
+            "projeto": "Projeto teste",
+            "responsavel": "1"
+        }
     },
     {
         "id": 3,
@@ -29,7 +28,17 @@
         "equipe": "Desenvolvimento",
         "prioridade": "Alta",
         "status": "Em desenvolvimento",
-        "projeto": "Projeto teste",
-        "responsavel": "1"
+        "projeto": "Projeto teste1",
+        "responsavel": "1",
+        "subtarefas": {
+            "titulo": "Titulo  de Subtarefas",
+            "descricao": "Descricao de Subtarefas",
+            "prazo": "2026-10-20",
+            "equipe": "Desenvolvimento",
+            "prioridade": "Alta",
+            "status": "Em desenvolvimento",
+            "projeto": "Projeto teste",
+            "responsavel": "1"
+        }
     }
 ]
