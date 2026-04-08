@@ -39,12 +39,23 @@ class JsonDB {
         }
         return $foiAlterado ? self::write($file, $data) : false;
     }
-    public static function delete(string $file, string $key, $value): bool
-    {
+    public static function delete(string $file, string $key, $value)
+    {   
+
+        // lê o arquivo
         $data = self::read($file);
+        
+        // filtra o arquivo:
+        // foreach $data as $item
+        // item tem campo e valor
         $filteredData = array_filter($data, function($item) use ($key, $value) {
+            // se tiver campo e valor, e se esse campo e valor forem diferentes do selecionado, mantem, caso não, exclui do array a ser retornado
             return isset($item[$key]) && $item[$key] != $value;
+            
         });
-        return self::write($file, array_values($filteredData));
+        //sobrescreve o arquivo
+        
+        // return self::write($file, array_values($filteredData));
+        return $filteredData;
     }
 }

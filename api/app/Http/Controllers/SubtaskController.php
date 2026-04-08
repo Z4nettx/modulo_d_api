@@ -98,13 +98,13 @@ class SubtaskController extends Controller
         if ($token !== $jwt[0]['jwt']) {
             return response()->json(['Message' => 'Atenção, token inválido'], 401);
         }
-        
+
         if (!empty($request->except(['descricao', 'prazo', 'status', 'prioridade', 'responsavel', 'tarefa', 'subtarefa']))) {
             return response()->json(['message' => 'Somente descrição, prazo, status, prioridade e responsável podem ser editados!'], 422);
         }
         $tarefaId = $request['tarefa']; // id da tarefa envido pelo form
         $stId = $request['subtarefa'];
-        
+
         $tarefas = JsonDB::read('tarefas'); // o array tarefa completo
         $camposPermitidos = [
             'descricao' => $request['descricao'],
@@ -117,7 +117,7 @@ class SubtaskController extends Controller
         foreach ($tarefas as $tarefa) {
             if ($tarefa['id'] == $tarefaId) {
                 $subtarefas = $tarefa['subtarefas'];
-                $encontrouSub = false;   
+                $encontrouSub = false;
                 foreach ($subtarefas as &$st) {
                     if ($st['id'] == $stId) {
                         $st = array_merge($st, $camposPermitidos);
@@ -140,12 +140,27 @@ class SubtaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, $id)
-    {   
+    public function destroy(Request $request)
+    {
+        $id = $request->tarefa;
+        $stId = $request->subtarefa;
         $tarefas = JsonDB::read('tarefas');
-        foreach ($tarefas as $tarefa) {
-            if ($tarefa)
+        foreach ($tarefas as &$tarefa) {
+            $encontrou = false;
+            if ($tarefa['id'] == $id) {
+                $tarefa['subtarefas'] = array_filter($tarefa['subtarefas'], function ($st) use ($stId) {
+                    return isset($st['id']) && $st['id'] != $stId;
+                });
+                $tarefa['subtarefas'] = array_values($tarefa['subtarefas']);
+                $encontrou = true;
+                break;
+            }
         }
-        JsonDB::delete('tarefas', $)
+        if ($encontrou) {
+            JsonDB::write('tarefas', $tarefas);
+            return response()->json(['message' => 'Subtarefa excluída com sucesso'], 201);
+        } else {
+            return response()->json('não encontrou');
+        }
     }
 }

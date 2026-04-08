@@ -41,4 +41,5 @@ Route::get('tarefa/{id}', [TaskController::class, 'show']);
 
 Route::post('/add_subtarefa', [SubtaskController::class, 'store']); 
 Route::put('/altera_subtarefa/{id}', [SubtaskController::class, 'update']); 
+Route::delete('/delete_subtarefa', [SubtaskController::class, 'destroy']); 
 

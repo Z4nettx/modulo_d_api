@@ -42,7 +42,7 @@ class TaskController extends Controller
 
         $users = JsonDB::read('usuarios');
         foreach ($users as $index => $user) {
-            $user;// [] de usuario (nome, email, equipe)
+            $user; // [] de usuario (nome, email, equipe)
             $index; // indice desse elemento dentro do array
 
             // 1
@@ -53,7 +53,7 @@ class TaskController extends Controller
                 } */
             // 1
         }
-        }
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -94,7 +94,7 @@ class TaskController extends Controller
         $tarefa = [
             'id' => count($tarefas) + 1,
             ...$request->all(),
-            'subtarefas' => [(object) []]
+            'subtarefas' => []
         ];
         if (JsonDB::store('tarefas', $tarefa)) {
             return response()->json(['message' => 'Nova tarefa registrada com sucesso!'], 201);
@@ -171,8 +171,8 @@ class TaskController extends Controller
         if ($token !== $jwt[0]['jwt']) {
             return response()->json(['Message' => 'Atenção, token inválido'], 401);
         }
-        $user = json_decode(base64_decode($token));
-        if ($user->equipe !== "Gerente de Projeto") {
+        $user = json_decode(base64_decode($token), true);
+        if ($user['equipe'] !== "Gerente de Projeto") {
             return response()->json(['message' => 'Você não tem permissão para excluir uma tarefa'], 401);
         }
         $tarefas = JsonDB::read('tarefas');
